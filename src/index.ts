@@ -1,3 +1,5 @@
+export { defaultConfig, mergeConfig } from './config.js';
+export { countFindings, hasError, compareSeverity } from './severity.js';
 export { explainCommand, lintCommand, analyzeMarkdown } from './analyze.js';
 export { extractShellBlocks, shellLinesFromMarkdown } from './markdown.js';
 export { parseCommand } from './parser.js';
