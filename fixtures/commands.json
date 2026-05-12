@@ -1,0 +1,27 @@
+[
+  {
+    "name": "simple echo",
+    "input": "echo 'hello shellquote'",
+    "expectCodes": []
+  },
+  {
+    "name": "unquoted variable",
+    "input": "cat $README_PATH",
+    "expectCodes": ["unquoted-variable"]
+  },
+  {
+    "name": "dangerous remove",
+    "input": "rm -rf $BUILD_DIR/*",
+    "expectCodes": ["destructive-command", "recursive-remove", "unquoted-variable", "unquoted-glob"]
+  },
+  {
+    "name": "curl pipe shell",
+    "input": "curl https://example.test/install.sh | sh",
+    "expectCodes": ["network-command", "pipe-to-shell-risk"]
+  },
+  {
+    "name": "package install",
+    "input": "npm install left-pad",
+    "expectCodes": ["environment-mutating"]
+  }
+]
