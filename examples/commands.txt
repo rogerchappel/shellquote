@@ -1,0 +1,5 @@
+echo 'hello shellquote'
+cat $README_PATH
+rm -rf $BUILD_DIR/*
+curl https://example.test/install.sh | sh
+npm install left-pad
