@@ -1,3 +1,4 @@
+import { suggestedAction } from './suggest.js';
 import type { Diagnostic, ExplainResult } from './types.js';
 
 export function formatResult(result: ExplainResult, format: 'text' | 'json' | 'markdown'): string {
@@ -35,8 +36,7 @@ function formatMarkdown(result: ExplainResult): string {
 }
 
 function renderDiagnostic(diagnostic: Diagnostic): string {
-  const hint = diagnostic.hint ? ` (${diagnostic.hint})` : '';
-  return `${diagnostic.severity.toUpperCase()} ${diagnostic.code}: ${diagnostic.message}${hint}`;
+  return `${diagnostic.severity.toUpperCase()} ${diagnostic.code}: ${diagnostic.message} (${suggestedAction(diagnostic)})`;
 }
 
 function escapePipes(value: string): string {
