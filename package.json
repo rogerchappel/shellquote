@@ -1,0 +1,61 @@
+{
+  "name": "shellquote",
+  "version": "0.1.0",
+  "description": "Local-first CLI for explaining, linting, and safely rewriting shell-ish commands and docs snippets.",
+  "type": "module",
+  "bin": {
+    "shellquote": "./dist/cli.js",
+    "shq": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "fixtures",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "smoke": "npm run build && bash scripts/smoke.sh",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm test && npm run check && npm run build && npm run smoke && npm run package:smoke"
+  },
+  "keywords": [
+    "shell",
+    "quoting",
+    "cli",
+    "lint",
+    "markdown",
+    "safety",
+    "shellcheck",
+    "typescript"
+  ],
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/shellquote.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/shellquote/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/shellquote#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
