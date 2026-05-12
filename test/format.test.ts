@@ -5,7 +5,7 @@ import { formatResult } from '../src/format.js';
 
 test('text formatter includes suggested action', () => {
   const output = formatResult(explainCommand('cat $README_PATH'), 'text');
-  assert.match(output, /Quote variable expansions/);
+  assert.match(output, /double quotes around variable expansions/);
 });
 
 test('markdown formatter renders findings table', () => {
