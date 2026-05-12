@@ -50,6 +50,12 @@ export interface ExplainResult {
   rewrite?: Rewrite;
 }
 
+export interface FindingCounts {
+  info: number;
+  warning: number;
+  error: number;
+}
+
 export interface CliOptions {
   format: 'text' | 'json' | 'markdown';
   docs: boolean;
