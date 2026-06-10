@@ -51,6 +51,8 @@ Use `--docs` with `--file` or `--stdin` to scan fenced shell blocks in docs:
 shellquote explain --docs --file fixtures/readme-snippets.md
 ```
 
+For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examples/agent-readme-review.md). It shows a small README review flow with Markdown output for risky install and download-piped-to-shell snippets.
+
 ## Local-first safety
 
 - no telemetry
