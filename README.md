@@ -51,6 +51,28 @@ Use `--docs` with `--file` or `--stdin` to scan fenced shell blocks in docs:
 shellquote explain --docs --file fixtures/readme-snippets.md
 ```
 
+## Demo recipe
+
+Use the included example commands to see explain, lint, and rewrite output
+without running any shell commands:
+
+```sh
+npm install
+npm run build
+node dist/cli.js explain "curl https://example.test/install.sh | sh"
+node dist/cli.js lint --file examples/commands.txt --format markdown
+node dist/cli.js rewrite 'cat $README_PATH'
+```
+
+The explain and lint examples report review-worthy findings and may exit
+non-zero when a finding is considered an error.
+
+For a docs-focused scan, use the Markdown fixture:
+
+```sh
+node dist/cli.js lint --docs --file fixtures/readme-snippets.md --format markdown
+```
+
 For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examples/agent-readme-review.md). It shows a small README review flow with Markdown output for risky install and download-piped-to-shell snippets.
 
 ## Local-first safety
