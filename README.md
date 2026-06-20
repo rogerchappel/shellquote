@@ -83,6 +83,16 @@ For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examp
 For a CI-style transcript of the Markdown fixture scan, see
 [`examples/docs-lint-transcript.md`](examples/docs-lint-transcript.md).
 
+For an approval-prompt style demo that explains a risky install command, lints
+the committed command fixture, and rewrites a simple variable command:
+
+```sh
+bash demo/agent-command-review.sh
+```
+
+See [docs/tutorials/agent-command-review.md](docs/tutorials/agent-command-review.md)
+for the review flow and expected report files.
+
 ## Local-first safety
 
 - no telemetry
