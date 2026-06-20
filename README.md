@@ -79,6 +79,13 @@ For a CI-style docs lint demo that writes JSON and Markdown reports:
 bash demo/ci-docs-lint.sh
 ```
 
+For a conservative rewrite demo that captures both a safe rewrite and a skipped
+destructive command:
+
+```sh
+bash demo/rewrite-review.sh
+```
+
 For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examples/agent-readme-review.md). It shows a small README review flow with Markdown output for risky install and download-piped-to-shell snippets.
 For a CI-style transcript of the Markdown fixture scan, see
 [`examples/docs-lint-transcript.md`](examples/docs-lint-transcript.md).
