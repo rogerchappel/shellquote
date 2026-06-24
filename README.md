@@ -115,8 +115,13 @@ npm test
 npm run check
 npm run build
 npm run smoke
+npm run package:smoke
+npm run release:check
 bash scripts/validate.sh
 ```
+
+`npm run release:check` is the promotion gate for maintainers. It combines the
+test suite, type checks, build, CLI smoke script, and dry-run package review.
 
 ## Prior art
 
