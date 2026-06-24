@@ -85,7 +85,26 @@ For an agent approval prompt review demo:
 bash demo/approval-prompt-review.sh
 ```
 
+For a conservative rewrite demo that captures both a safe rewrite and a skipped
+destructive command:
+
+```sh
+bash demo/rewrite-review.sh
+```
+
 For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examples/agent-readme-review.md). It shows a small README review flow with Markdown output for risky install and download-piped-to-shell snippets.
+For a CI-style transcript of the Markdown fixture scan, see
+[`examples/docs-lint-transcript.md`](examples/docs-lint-transcript.md).
+
+For an approval-prompt style demo that explains a risky install command, lints
+the committed command fixture, and rewrites a simple variable command:
+
+```sh
+bash demo/agent-command-review.sh
+```
+
+See [docs/tutorials/agent-command-review.md](docs/tutorials/agent-command-review.md)
+for the review flow and expected report files.
 
 ## Local-first safety
 
