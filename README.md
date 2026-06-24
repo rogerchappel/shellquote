@@ -79,6 +79,12 @@ For a CI-style docs lint demo that writes JSON and Markdown reports:
 bash demo/ci-docs-lint.sh
 ```
 
+For an agent approval prompt review demo:
+
+```sh
+bash demo/approval-prompt-review.sh
+```
+
 For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examples/agent-readme-review.md). It shows a small README review flow with Markdown output for risky install and download-piped-to-shell snippets.
 
 ## Local-first safety
