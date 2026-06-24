@@ -79,6 +79,12 @@ For a CI-style docs lint demo that writes JSON and Markdown reports:
 bash demo/ci-docs-lint.sh
 ```
 
+For an agent approval prompt review demo:
+
+```sh
+bash demo/approval-prompt-review.sh
+```
+
 For a conservative rewrite demo that captures both a safe rewrite and a skipped
 destructive command:
 
