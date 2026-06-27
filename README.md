@@ -106,6 +106,15 @@ bash demo/agent-command-review.sh
 See [docs/tutorials/agent-command-review.md](docs/tutorials/agent-command-review.md)
 for the review flow and expected report files.
 
+To review Markdown copied from an agent approval prompt over stdin:
+
+```sh
+bash demo/stdin-approval-docs.sh
+```
+
+See [docs/tutorials/stdin-approval-docs.md](docs/tutorials/stdin-approval-docs.md)
+for the stdin workflow and report files.
+
 ## Local-first safety
 
 - no telemetry
