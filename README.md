@@ -81,6 +81,12 @@ bash demo/ci-docs-lint.sh
 
 For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examples/agent-readme-review.md). It shows a small README review flow with Markdown output for risky install and download-piped-to-shell snippets.
 
+To run that review from checked-in fixtures:
+
+```sh
+bash demo/agent-readme-review.sh
+```
+
 ## Local-first safety
 
 - no telemetry
