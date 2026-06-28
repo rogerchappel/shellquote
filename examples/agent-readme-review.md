@@ -23,20 +23,16 @@ npm run build
 node dist/cli.js lint --docs --file examples/agent-readme-review-input.md --format markdown
 ```
 
-If you want a self-contained run, write the input first:
+For a self-contained run, use the checked-in input fixture:
 
 ```sh
-cat > examples/agent-readme-review-input.md <<'EOF'
-# Demo notes
-
-```sh
-npm install shellquote
-shellquote lint "rm -rf $BUILD_DIR/*"
-curl https://example.test/install.sh | sh
-```
-EOF
-
 node dist/cli.js lint --docs --file examples/agent-readme-review-input.md --format markdown
+```
+
+Or run the full demo script:
+
+```sh
+bash demo/agent-readme-review.sh
 ```
 
 ## Expected talking points

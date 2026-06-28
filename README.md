@@ -115,6 +115,12 @@ bash demo/stdin-approval-docs.sh
 See [docs/tutorials/stdin-approval-docs.md](docs/tutorials/stdin-approval-docs.md)
 for the stdin workflow and report files.
 
+To run that review from checked-in fixtures:
+
+```sh
+bash demo/agent-readme-review.sh
+```
+
 ## Local-first safety
 
 - no telemetry
