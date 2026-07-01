@@ -121,6 +121,9 @@ To run that review from checked-in fixtures:
 bash demo/agent-readme-review.sh
 ```
 
+For a concise recording flow based on the checked-in examples and demo scripts,
+see [`docs/promo/demo-runbook.md`](docs/promo/demo-runbook.md).
+
 ## Local-first safety
 
 - no telemetry
