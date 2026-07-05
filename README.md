@@ -121,6 +121,16 @@ To run that review from checked-in fixtures:
 bash demo/agent-readme-review.sh
 ```
 
+To review package-script style commands before they land in release notes or
+agent prompts:
+
+```sh
+bash demo/package-script-review.sh
+```
+
+See [docs/tutorials/package-script-review.md](docs/tutorials/package-script-review.md)
+for the fixture behavior and generated reports.
+
 For a concise recording flow based on the checked-in examples and demo scripts,
 see [`docs/promo/demo-runbook.md`](docs/promo/demo-runbook.md).
 
