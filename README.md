@@ -96,6 +96,16 @@ For a promotion-ready walkthrough, see [`examples/agent-readme-review.md`](examp
 For a CI-style transcript of the Markdown fixture scan, see
 [`examples/docs-lint-transcript.md`](examples/docs-lint-transcript.md).
 
+For a GitHub Actions-focused variant that reviews copied workflow `run:` blocks,
+run:
+
+```sh
+bash demo/github-actions-script-review.sh
+```
+
+The companion tutorial is
+[`docs/tutorials/github-actions-script-review.md`](docs/tutorials/github-actions-script-review.md).
+
 For an approval-prompt style demo that explains a risky install command, lints
 the committed command fixture, and rewrites a simple variable command:
 
