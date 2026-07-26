@@ -29,6 +29,14 @@ shellquote lint --docs --file README.md --format markdown
 
 Aliases: `shellquote` and `shq`.
 
+Unknown long options and options missing required values are rejected with exit
+status `2`. To analyze command text that begins with `--`, place it after the
+option delimiter:
+
+```sh
+shellquote explain -- --version
+```
+
 ## What it catches
 
 - unterminated quotes
@@ -50,6 +58,9 @@ Use `--docs` with `--file` or `--stdin` to scan fenced shell blocks in docs:
 ```sh
 shellquote explain --docs --file fixtures/readme-snippets.md
 ```
+
+Markdown scanning is supported by `explain` and `lint`. `rewrite --docs` is
+rejected because rewrites operate on one command at a time.
 
 ## Demo recipe
 
