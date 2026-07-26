@@ -19,8 +19,11 @@ Options:
   --file <path>      Read input from a file
   --stdin            Read input from stdin
   --fix              With lint, include rewrite suggestions
+  --                 Treat all following arguments as command input
   -h, --help         Show help
   -v, --version      Show version
+
+Note: rewrite does not support --docs.
 `;
 
 async function main(argv: string[]): Promise<number> {
@@ -39,6 +42,9 @@ async function main(argv: string[]): Promise<number> {
     return 2;
   }
   const { options, args } = parseOptions(rest);
+  if (command === 'rewrite' && options.docs) {
+    throw new Error('rewrite does not support --docs; rewrite one command at a time without --docs.');
+  }
   const source = await readInput(args, options);
   if (options.docs) {
     const results = analyzeMarkdown(source);
@@ -61,14 +67,28 @@ function parseOptions(argv: string[]): { options: CliOptions; args: string[] } {
   const args: string[] = [];
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]!;
-    if (arg === '--format') options.format = parseFormat(argv[++i]);
+    if (arg === '--') {
+      args.push(...argv.slice(i + 1));
+      break;
+    }
+    if (arg === '--format') options.format = parseFormat(optionValue(argv, i, '--format'));
     else if (arg === '--docs') options.docs = true;
     else if (arg === '--fix') options.fix = true;
     else if (arg === '--stdin') options.stdin = true;
-    else if (arg === '--file') options.file = argv[++i];
+    else if (arg === '--file') options.file = optionValue(argv, i, '--file');
+    else if (arg.startsWith('--')) throw new Error(`Unknown option: ${arg}`);
     else args.push(arg);
+    if (arg === '--format' || arg === '--file') i += 1;
   }
   return { options, args };
+}
+
+function optionValue(argv: string[], index: number, option: string): string {
+  const value = argv[index + 1];
+  if (value === undefined || value.startsWith('--')) {
+    throw new Error(`${option} requires a value`);
+  }
+  return value;
 }
 
 function parseFormat(value: string | undefined): CliOptions['format'] {
