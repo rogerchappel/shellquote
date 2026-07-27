@@ -6,14 +6,25 @@ It does **not** execute commands. It reads strings and Markdown snippets, points
 
 ## Install
 
+shellquote is currently distributed from its GitHub source repository, not the
+npm registry. Install the current release-ready source with:
+
 ```sh
-npm install -g shellquote
+git clone --depth 1 https://github.com/rogerchappel/shellquote.git
+cd shellquote
+npm ci
+npm run build
+npm install --global .
+shellquote --version
 ```
 
-During development:
+The global install provides both the `shellquote` and `shq` commands. An npm
+registry install will be documented if registry publishing is enabled.
+
+During development, use the same checkout without the global install:
 
 ```sh
-npm install
+npm ci
 npm run build
 node dist/cli.js --help
 ```
@@ -171,12 +182,14 @@ npm run check
 npm run build
 npm run smoke
 npm run package:smoke
+npm run install:smoke
 npm run release:check
 bash scripts/validate.sh
 ```
 
 `npm run release:check` is the promotion gate for maintainers. It combines the
-test suite, type checks, build, CLI smoke script, and dry-run package review.
+test suite, type checks, build, CLI smoke script, dry-run package review, and a
+clean-checkout smoke test of the documented GitHub installation.
 
 ## Prior art
 
