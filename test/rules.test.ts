@@ -13,3 +13,11 @@ for (const fixture of fixtures) {
     for (const expected of fixture.expectCodes) assert.ok(codes.includes(expected), `${expected} missing from ${codes.join(', ')}`);
   });
 }
+
+test('only flags a pipe directly fed by curl or wget', () => {
+  const separated = explainCommand('curl https://example.test/file; echo ok | cat');
+  assert.ok(!separated.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
+
+  const piped = explainCommand('curl https://example.test/install.sh | sh');
+  assert.ok(piped.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
+});

@@ -13,3 +13,18 @@ test('reports unterminated quotes', () => {
   const result = tokenize("echo 'oops");
   assert.equal(result.errors[0]?.code, 'unterminated-quote');
 });
+
+test('only starts comments where a shell token can begin', () => {
+  const embedded = tokenize('echo foo#bar');
+  assert.deepEqual(embedded.tokens.map((token) => [token.kind, token.value]), [
+    ['word', 'echo'],
+    ['word', 'foo#bar'],
+  ]);
+
+  const comment = tokenize('echo foo # ordinary comment');
+  assert.deepEqual(comment.tokens.map((token) => [token.kind, token.value]), [
+    ['word', 'echo'],
+    ['word', 'foo'],
+    ['comment', '# ordinary comment'],
+  ]);
+});

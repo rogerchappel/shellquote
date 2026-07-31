@@ -7,13 +7,13 @@ const PACKAGE_INSTALLERS = new Set(['npm', 'pnpm', 'yarn', 'pip', 'brew', 'apt',
 
 export function lintParsed(parsed: ParsedCommand): Diagnostic[] {
   const diagnostics: Diagnostic[] = [...parsed.errors];
-  for (const segment of parsed.segments) {
+  for (const [segmentIndex, segment] of parsed.segments.entries()) {
     const name = commandName(segment);
     if (!name) continue;
     const args = segment.tokens.slice(1);
     if (DESTRUCTIVE.has(name)) diagnostics.push(destructiveDiagnostic(name, segment.text, segment.start, segment.end));
     if (name === 'rm') diagnostics.push(...lintRm(args));
-    if (name === 'curl' || name === 'wget') diagnostics.push(...lintNetworkPipe(parsed, name));
+    if (name === 'curl' || name === 'wget') diagnostics.push(...lintNetworkPipe(parsed, segmentIndex, name));
     if (NETWORK.has(name)) diagnostics.push({ code: 'network-command', severity: 'info', message: `${name} reaches outside this machine.`, hint: 'Keep tokens and URLs out of copied examples unless intentional.', segment: segment.text, start: segment.start, end: segment.end });
     if (PACKAGE_INSTALLERS.has(name)) diagnostics.push({ code: 'environment-mutating', severity: 'warning', message: `${name} can change the local environment.`, hint: 'Pin versions and separate install steps from execution steps.', segment: segment.text, start: segment.start, end: segment.end });
     diagnostics.push(...lintTokens(segment.tokens));
@@ -34,12 +34,10 @@ function lintRm(args: Token[]): Diagnostic[] {
   return diagnostics;
 }
 
-function lintNetworkPipe(parsed: ParsedCommand, name: string): Diagnostic[] {
-  const pipeIndex = parsed.tokens.findIndex((token) => token.kind === 'operator' && token.value === '|');
-  if (pipeIndex === -1) return [];
-  const networkIndex = parsed.tokens.findIndex((token) => token.value === name);
-  if (networkIndex !== -1 && networkIndex < pipeIndex) return [{ code: 'pipe-to-shell-risk', severity: 'error', message: `${name} output is piped into another command.`, hint: 'Download to a file, inspect it, then run explicitly.' }];
-  return [];
+function lintNetworkPipe(parsed: ParsedCommand, segmentIndex: number, name: string): Diagnostic[] {
+  const nextSegment = parsed.segments[segmentIndex + 1];
+  if (nextSegment?.operatorBefore !== '|') return [];
+  return [{ code: 'pipe-to-shell-risk', severity: 'error', message: `${name} output is piped into another command.`, hint: 'Download to a file, inspect it, then run explicitly.' }];
 }
 
 function lintTokens(tokens: Token[]): Diagnostic[] {
