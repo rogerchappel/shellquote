@@ -58,7 +58,7 @@ export function tokenize(source: string): TokenizeResult {
     let value = '';
     while (i < source.length) {
       const current = source[i];
-      if (/\s/.test(current) || current === '#' || OPERATORS.some((candidate) => source.startsWith(candidate, i))) break;
+      if (/\s/.test(current) || OPERATORS.some((candidate) => source.startsWith(candidate, i))) break;
       if (current === '\\' && i + 1 < source.length) {
         value += source.slice(i, i + 2);
         i += 2;
