@@ -73,6 +73,11 @@ shellquote explain --docs --file fixtures/readme-snippets.md
 Markdown scanning is supported by `explain` and `lint`. `rewrite --docs` is
 rejected because rewrites operate on one command at a time.
 
+Markdown output wraps input and rewrite commands in code spans whose delimiter
+is longer than any backtick run in the command. Command substitutions such as
+``echo `date` `` therefore remain intact when the report is rendered, and
+pipes in findings-table cells are escaped so they do not create extra columns.
+
 ## Demo recipe
 
 Use the included example commands to see explain, lint, and rewrite output
