@@ -68,3 +68,12 @@ test('reports corrected text summaries for embedded hashes', () => {
   assert.equal(result.status, 0);
   assert.match(result.stdout, /0 error, 0 warning, 0 info/);
 });
+
+test('renders command substitution as valid Markdown code spans', () => {
+  const result = runCli(['explain', 'echo `date`', '--format', 'markdown']);
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /- \*\*Input:\*\* ``echo `date```/);
+  assert.match(result.stdout, /\*\*Rewrite:\*\* ``echo `date```/);
+  assert.equal(result.stderr, '');
+});
