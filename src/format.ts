@@ -26,12 +26,12 @@ function formatText(result: ExplainResult): string {
 }
 
 function formatMarkdown(result: ExplainResult): string {
-  const lines = [`### shellquote`, '', `- **Input:** \`${escapePipes(result.input)}\``, `- **Summary:** ${result.summary}`];
+  const lines = [`### shellquote`, '', `- **Input:** ${markdownCodeSpan(result.input)}`, `- **Summary:** ${result.summary}`];
   if (result.diagnostics.length > 0) {
     lines.push('', '| Severity | Code | Message | Hint |', '| --- | --- | --- | --- |');
     for (const diagnostic of result.diagnostics) lines.push(`| ${diagnostic.severity} | \`${diagnostic.code}\` | ${escapePipes(diagnostic.message)} | ${escapePipes(diagnostic.hint ?? '')} |`);
   }
-  if (result.rewrite) lines.push('', `**Rewrite:** \`${escapePipes(result.rewrite.output)}\``);
+  if (result.rewrite) lines.push('', `**Rewrite:** ${markdownCodeSpan(result.rewrite.output)}`);
   return lines.join('\n');
 }
 
@@ -41,4 +41,10 @@ function renderDiagnostic(diagnostic: Diagnostic): string {
 
 function escapePipes(value: string): string {
   return value.replaceAll('|', '\\|');
+}
+
+function markdownCodeSpan(value: string): string {
+  const longestRun = Math.max(0, ...Array.from(value.matchAll(/`+/g), (match) => match[0].length));
+  const delimiter = '`'.repeat(longestRun + 1);
+  return `${delimiter}${value}${delimiter}`;
 }
