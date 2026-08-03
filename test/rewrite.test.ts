@@ -13,3 +13,27 @@ test('skips destructive commands', () => {
   assert.equal(rewrite.changed, false);
   assert.match(rewrite.skipped.join('\n'), /rm/);
 });
+
+test('preserves trailing comments and original spacing', () => {
+  const source = 'cat   $README_PATH  # keep this explanation';
+  const rewrite = rewriteCommand(source);
+
+  assert.equal(rewrite.output, 'cat   "$README_PATH"  # keep this explanation');
+  assert.equal(rewrite.changed, true);
+});
+
+test('rewrites executable tokens after a chain-operator comment', () => {
+  const source = 'echo ready && # explain why this follows\ncat $README_PATH';
+  const rewrite = rewriteCommand(source);
+
+  assert.equal(rewrite.output, 'echo ready && # explain why this follows\ncat "$README_PATH"');
+  assert.equal(rewrite.changed, true);
+});
+
+test('preserves multiline source when no safe rewrite is needed', () => {
+  const source = 'echo first # one\nprintf second # two';
+  const rewrite = rewriteCommand(source);
+
+  assert.equal(rewrite.output, source);
+  assert.equal(rewrite.changed, false);
+});
