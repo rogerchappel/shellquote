@@ -8,27 +8,39 @@ export function rewriteCommand(source: string): Rewrite {
   const parsed = parseCommand(source);
   const notes: string[] = [];
   const skipped: string[] = [];
-  const pieces: string[] = [];
-  let changed = false;
+  const replacements = new Map<Token, string>();
 
-  for (const [index, segment] of parsed.segments.entries()) {
-    if (index > 0 && segment.operatorBefore) pieces.push(segment.operatorBefore);
+  for (const segment of parsed.segments) {
     const command = segment.tokens[0]?.value;
     if (command && DANGEROUS_COMMANDS.has(command)) {
       skipped.push(`Skipped automatic rewrite for approval-sensitive command: ${command}`);
-      pieces.push(segment.text);
       continue;
     }
-    const rewritten = segment.tokens.map((token) => rewriteToken(token));
-    if (rewritten.some((part, tokenIndex) => part !== tokenText(segment.tokens[tokenIndex]!))) {
-      changed = true;
+    let segmentChanged = false;
+    for (const token of segment.tokens) {
+      const rewritten = rewriteToken(token);
+      if (rewritten !== source.slice(token.start, token.end)) {
+        replacements.set(token, rewritten);
+        segmentChanged = true;
+      }
+    }
+    if (segmentChanged) {
       notes.push(`Quoted risky tokens in: ${segment.text}`);
     }
-    pieces.push(rewritten.join(' '));
   }
 
-  const output = pieces.join(' ');
-  return { changed: changed && output !== source, output: output || source, notes, skipped };
+  let cursor = 0;
+  let output = '';
+  for (const token of parsed.tokens) {
+    const replacement = replacements.get(token);
+    if (replacement === undefined) continue;
+    output += source.slice(cursor, token.start);
+    output += replacement;
+    cursor = token.end;
+  }
+  output += source.slice(cursor);
+
+  return { changed: output !== source, output, notes, skipped };
 }
 
 function rewriteToken(token: Token): string {
