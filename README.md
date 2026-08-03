@@ -60,7 +60,7 @@ shellquote explain -- --version
 
 ## Rewrite philosophy
 
-`shellquote rewrite` is intentionally modest. It quotes unambiguous variables and literal glob-looking tokens, but skips approval-sensitive commands like `rm` and `sudo` rather than pretending safety can be automated.
+`shellquote rewrite` is intentionally modest. It quotes unambiguous variables and literal glob-looking tokens, but skips approval-sensitive commands like `rm` and `sudo` rather than pretending safety can be automated. Rewrites preserve shell comments, whitespace, and line structure around the executable tokens they change.
 
 ## Markdown scanning
 
