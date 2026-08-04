@@ -18,8 +18,10 @@ export function tokenize(source: string): TokenizeResult {
       continue;
     }
     if (ch === '#') {
-      tokens.push({ kind: 'comment', value: source.slice(i), start: i, end: source.length });
-      break;
+      const start = i;
+      while (i < source.length && source[i] !== '\n') i += 1;
+      tokens.push({ kind: 'comment', value: source.slice(start, i), start, end: i });
+      continue;
     }
     const op = OPERATORS.find((candidate) => source.startsWith(candidate, i));
     if (op) {

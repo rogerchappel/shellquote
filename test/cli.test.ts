@@ -77,3 +77,12 @@ test('renders command substitution as valid Markdown code spans', () => {
   assert.match(result.stdout, /\*\*Rewrite:\*\* ``echo `date```/);
   assert.equal(result.stderr, '');
 });
+
+test('rewrite preserves comments and multiline command structure', () => {
+  const source = 'echo ready && # retain context\ncat $README_PATH';
+  const result = runCli(['rewrite', '--stdin'], source);
+
+  assert.equal(result.status, 0);
+  assert.equal(result.stdout, 'echo ready && # retain context\ncat "$README_PATH"\n');
+  assert.equal(result.stderr, '');
+});
