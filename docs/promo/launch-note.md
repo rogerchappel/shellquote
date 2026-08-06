@@ -2,7 +2,7 @@
 
 Shellquote is a local-first CLI for reviewing shell-ish commands before they land in READMEs, agent prompts, release notes, or CI documentation.
 
-It explains and lints command strings and fenced shell snippets without executing them. Current checks cover quoting footguns, unquoted variables and globs, destructive commands, download-piped-to-shell patterns, and long chains that should be split for review.
+It explains and lints command strings and CommonMark backtick- or tilde-fenced shell snippets without executing them. Current checks cover quoting footguns, unquoted variables and globs, destructive commands, downloads piped directly into recognized shells or interpreters, and long chains that should be split for review. A download piped to a benign consumer such as `jq` remains an informational network finding rather than a pipe-to-shell error.
 
 ## What to show
 
