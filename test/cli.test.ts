@@ -63,6 +63,16 @@ test('reports corrected JSON findings and exit codes for pipeline boundaries', (
   assert.ok(pipedOutput.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
 });
 
+test('keeps benign network consumers informational', () => {
+  const result = runCli(['lint', 'curl https://example.test/data.json | jq .', '--format', 'json']);
+
+  assert.equal(result.status, 0);
+  const output = JSON.parse(result.stdout) as { summary: string; diagnostics: Array<{ code: string; severity: string }> };
+  assert.match(output.summary, /0 error/);
+  assert.ok(output.diagnostics.some((diagnostic) => diagnostic.code === 'network-command' && diagnostic.severity === 'info'));
+  assert.ok(!output.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
+});
+
 test('reports corrected text summaries for embedded hashes', () => {
   const result = runCli(['lint', 'echo foo#bar', '--format', 'text']);
   assert.equal(result.status, 0);
