@@ -4,6 +4,11 @@ import type { Diagnostic, ParsedCommand, Token } from './types.js';
 const DESTRUCTIVE = new Set(['rm', 'rmdir', 'mv', 'dd', 'mkfs', 'chmod', 'chown', 'sudo']);
 const NETWORK = new Set(['curl', 'wget', 'ssh', 'scp', 'rsync']);
 const PACKAGE_INSTALLERS = new Set(['npm', 'pnpm', 'yarn', 'pip', 'brew', 'apt', 'apt-get']);
+const PIPE_EXECUTION_TARGETS = new Set([
+  'sh', 'bash', 'dash', 'zsh', 'ksh', 'fish', 'csh', 'tcsh',
+  'node', 'deno', 'bun', 'python', 'python2', 'python3', 'perl', 'ruby', 'php', 'lua',
+  'pwsh', 'powershell',
+]);
 
 export function lintParsed(parsed: ParsedCommand): Diagnostic[] {
   const diagnostics: Diagnostic[] = [...parsed.errors];
@@ -37,7 +42,13 @@ function lintRm(args: Token[]): Diagnostic[] {
 function lintNetworkPipe(parsed: ParsedCommand, segmentIndex: number, name: string): Diagnostic[] {
   const nextSegment = parsed.segments[segmentIndex + 1];
   if (nextSegment?.operatorBefore !== '|') return [];
-  return [{ code: 'pipe-to-shell-risk', severity: 'error', message: `${name} output is piped into another command.`, hint: 'Download to a file, inspect it, then run explicitly.' }];
+  const consumer = commandName(nextSegment);
+  if (!consumer || !PIPE_EXECUTION_TARGETS.has(commandBasename(consumer))) return [];
+  return [{ code: 'pipe-to-shell-risk', severity: 'error', message: `${name} output is piped directly into ${consumer}.`, hint: 'Download to a file, inspect it, then run explicitly.' }];
+}
+
+function commandBasename(command: string): string {
+  return command.replace(/\\/g, '/').split('/').pop()?.toLowerCase().replace(/\.exe$/, '') ?? '';
 }
 
 function lintTokens(tokens: Token[]): Diagnostic[] {
