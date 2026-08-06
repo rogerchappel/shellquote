@@ -21,3 +21,23 @@ test('only flags a pipe directly fed by curl or wget', () => {
   const piped = explainCommand('curl https://example.test/install.sh | sh');
   assert.ok(piped.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
 });
+
+test('only treats direct interpreter consumers as pipe-to-shell risks', () => {
+  for (const input of [
+    'curl https://example.test/data.json | jq .',
+    'wget -qO- https://example.test/data.txt | grep ready',
+    'curl https://example.test/script.sh | cat | sh',
+  ]) {
+    const result = explainCommand(input);
+    assert.ok(!result.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), input);
+    assert.ok(result.diagnostics.some((diagnostic) => diagnostic.code === 'network-command'), input);
+  }
+
+  for (const input of [
+    'curl https://example.test/install.sh | bash',
+    'wget -qO- https://example.test/tool.py | python3',
+    'curl https://example.test/install.ps1 | /usr/bin/pwsh',
+  ]) {
+    assert.ok(explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), input);
+  }
+});

@@ -10,20 +10,26 @@ const SHELL_LANGS = new Set(['sh', 'bash', 'shell', 'zsh', 'console', 'terminal'
 export function extractShellBlocks(markdown: string): CodeBlock[] {
   const lines = markdown.split(/\r?\n/);
   const blocks: CodeBlock[] = [];
-  let current: { language: string; startLine: number; lines: string[] } | undefined;
+  let current: { language: string; startLine: number; marker: '`' | '~'; length: number; lines: string[] } | undefined;
 
   lines.forEach((line, index) => {
-    const fence = line.match(/^```\s*([A-Za-z0-9_-]*)/);
-    if (fence) {
-      if (current) {
+    if (current) {
+      const closingFence = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*$/);
+      if (closingFence && closingFence[1]?.[0] === current.marker && closingFence[1].length >= current.length) {
         if (isShellLanguage(current.language)) blocks.push({ language: current.language, code: current.lines.join('\n'), startLine: current.startLine, endLine: index + 1 });
         current = undefined;
-      } else {
-        current = { language: fence[1] ?? '', startLine: index + 1, lines: [] };
+        return;
       }
+      current.lines.push(line);
       return;
     }
-    current?.lines.push(line);
+
+    const openingFence = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*([^ \t]*)/);
+    if (!openingFence) return;
+    const marker = openingFence[1]?.[0];
+    const info = openingFence[2] ?? '';
+    if ((marker !== '`' && marker !== '~') || (marker === '`' && info.includes('`'))) return;
+    current = { language: info, startLine: index + 1, marker, length: openingFence[1].length, lines: [] };
   });
   return blocks;
 }

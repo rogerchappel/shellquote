@@ -54,7 +54,7 @@ shellquote explain -- --version
 - unquoted variables and globs
 - destructive commands such as `rm`, `dd`, and `mkfs`
 - recursive removals and broad targets
-- download-piped-to-shell patterns
+- downloads piped directly to a shell or interpreter (for example, `curl ... | sh` or `wget ... | python3`)
 - privileged/network command combinations
 - long chains that should be split into reviewable steps
 
@@ -72,6 +72,16 @@ shellquote explain --docs --file fixtures/readme-snippets.md
 
 Markdown scanning is supported by `explain` and `lint`. `rewrite --docs` is
 rejected because rewrites operate on one command at a time.
+
+Shell blocks may use CommonMark backtick or tilde fences of three or more
+matching characters. A closing fence must use the same character and be at
+least as long as its opener. Both unlabeled fences and fences labeled `sh`,
+`bash`, `shell`, `zsh`, `console`, or `terminal` are scanned.
+
+The `pipe-to-shell-risk` error is limited to `curl` or `wget` output piped
+directly into a recognized shell or interpreter. Benign consumers such as
+`jq`, `grep`, and `cat` retain the informational `network-command` finding but
+do not produce that execution error.
 
 Markdown output wraps input and rewrite commands in code spans whose delimiter
 is longer than any backtick run in the command. Command substitutions such as
