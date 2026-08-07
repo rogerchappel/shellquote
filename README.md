@@ -58,6 +58,12 @@ shellquote explain -- --version
 - privileged/network command combinations
 - long chains that should be split into reviewable steps
 
+Executable checks use the command basename, so path-qualified forms such as
+`/bin/rm` and Windows-style `C:\Tools\curl.exe` receive the same findings as
+`rm` and `curl`. Privileged/network findings are based on parsed commands,
+including a command delegated through `sudo`; words that appear only in quoted
+arguments or comments do not trigger the combination.
+
 ## Rewrite philosophy
 
 `shellquote rewrite` is intentionally modest. It quotes unambiguous variables and literal glob-looking tokens, but skips approval-sensitive commands like `rm` and `sudo` rather than pretending safety can be automated. Rewrites preserve shell comments, whitespace, and line structure around the executable tokens they change.
