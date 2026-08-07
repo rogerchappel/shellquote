@@ -13,8 +13,9 @@ const PIPE_EXECUTION_TARGETS = new Set([
 export function lintParsed(parsed: ParsedCommand): Diagnostic[] {
   const diagnostics: Diagnostic[] = [...parsed.errors];
   for (const [segmentIndex, segment] of parsed.segments.entries()) {
-    const name = commandName(segment);
-    if (!name) continue;
+    const command = commandName(segment);
+    if (!command) continue;
+    const name = commandBasename(command);
     const args = segment.tokens.slice(1);
     if (DESTRUCTIVE.has(name)) diagnostics.push(destructiveDiagnostic(name, segment.text, segment.start, segment.end));
     if (name === 'rm') diagnostics.push(...lintRm(args));
@@ -66,8 +67,33 @@ function lintChains(parsed: ParsedCommand): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const operators = parsed.tokens.filter((token) => token.kind === 'operator' && ['&&', '||', ';'].includes(token.value));
   if (operators.length >= 2) diagnostics.push({ code: 'complex-chain', severity: 'warning', message: 'Command chain has multiple control operators.', hint: 'Break long chains into separate documented steps.' });
-  if (parsed.source.includes('sudo') && (parsed.source.includes('curl') || parsed.source.includes('wget'))) diagnostics.push({ code: 'network-plus-privilege', severity: 'error', message: 'Network download and privileged execution appear together.', hint: 'Separate download, verification, and privileged action.' });
+  const executables = parsed.segments.flatMap(segmentExecutables);
+  if (executables.includes('sudo') && executables.some((name) => name === 'curl' || name === 'wget')) diagnostics.push({ code: 'network-plus-privilege', severity: 'error', message: 'Network download and privileged execution appear together.', hint: 'Separate download, verification, and privileged action.' });
   return diagnostics;
+}
+
+function segmentExecutables(segment: ParsedCommand['segments'][number]): string[] {
+  const command = commandName(segment);
+  if (!command) return [];
+  const primary = commandBasename(command);
+  if (primary !== 'sudo') return [primary];
+
+  const args = segment.tokens.slice(1).filter((token) => token.kind === 'word' || token.kind === 'string');
+  const optionsWithValues = new Set(['-C', '--close-from', '-D', '--chdir', '-g', '--group', '-h', '--host', '-p', '--prompt', '-R', '--chroot', '-T', '--command-timeout', '-u', '--user']);
+  for (let index = 0; index < args.length; index += 1) {
+    const value = args[index]?.value ?? '';
+    if (value === '--') {
+      const delegated = args[index + 1]?.value;
+      return delegated ? [primary, commandBasename(delegated)] : [primary];
+    }
+    if (optionsWithValues.has(value)) {
+      index += 1;
+      continue;
+    }
+    if (value.startsWith('-')) continue;
+    return [primary, commandBasename(value)];
+  }
+  return [primary];
 }
 
 function dedupe(diagnostics: Diagnostic[]): Diagnostic[] {
