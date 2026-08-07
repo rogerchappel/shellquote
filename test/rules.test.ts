@@ -41,3 +41,31 @@ test('only treats direct interpreter consumers as pipe-to-shell risks', () => {
     assert.ok(explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), input);
   }
 });
+
+test('normalizes executable paths before applying command rules', () => {
+  const remove = explainCommand('/bin/rm -rf build');
+  const removeCodes = remove.diagnostics.map((diagnostic) => diagnostic.code);
+  assert.ok(removeCodes.includes('destructive-command'));
+  assert.ok(removeCodes.includes('recursive-remove'));
+
+  const download = explainCommand(String.raw`C:\Tools\curl.exe https://example.test/file`);
+  assert.ok(download.diagnostics.some((diagnostic) => diagnostic.code === 'network-command'));
+});
+
+test('derives network-plus-privilege from parsed executables', () => {
+  for (const input of [
+    `echo 'sudo curl'`,
+    'echo safe # sudo curl',
+    'printf curl | grep sudo',
+  ]) {
+    assert.ok(!explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'network-plus-privilege'), input);
+  }
+
+  for (const input of [
+    'sudo curl https://example.test/file',
+    'curl https://example.test/file && sudo install tool /usr/local/bin/tool',
+    String.raw`C:\Windows\System32\curl.exe https://example.test/file && /usr/bin/sudo true`,
+  ]) {
+    assert.ok(explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'network-plus-privilege'), input);
+  }
+});
