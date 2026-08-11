@@ -35,7 +35,30 @@ export function extractShellBlocks(markdown: string): CodeBlock[] {
 }
 
 export function shellLinesFromMarkdown(markdown: string): string[] {
-  return extractShellBlocks(markdown).flatMap((block) => block.code.split(/\r?\n/)).map((line) => line.replace(/^\$\s*/, '').trim()).filter(Boolean).filter((line) => !line.startsWith('#'));
+  return extractShellBlocks(markdown).flatMap((block) => logicalShellLines(block.code));
+}
+
+function logicalShellLines(code: string): string[] {
+  const commands: string[] = [];
+  let continued = '';
+
+  for (const physicalLine of code.split(/\r?\n/)) {
+    const line = physicalLine.replace(/^\s*(?:\$|>)\s*/, '').trim();
+    if (!continued && (!line || line.startsWith('#'))) continue;
+
+    const trailingBackslashes = line.match(/\\+$/)?.[0].length ?? 0;
+    const hasContinuation = trailingBackslashes % 2 === 1;
+    const part = hasContinuation ? line.slice(0, -1).trimEnd() : line;
+    continued = [continued, part].filter(Boolean).join(' ');
+
+    if (!hasContinuation) {
+      if (continued) commands.push(continued);
+      continued = '';
+    }
+  }
+
+  if (continued) commands.push(continued);
+  return commands;
 }
 
 function isShellLanguage(language: string): boolean {
