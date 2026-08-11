@@ -84,6 +84,21 @@ matching characters. A closing fence must use the same character and be at
 least as long as its opener. Both unlabeled fences and fences labeled `sh`,
 `bash`, `shell`, `zsh`, `console`, or `terminal` are scanned.
 
+Commands continued with a trailing backslash are scanned as one logical
+command, including across `$` and `>` console prompts. Commands on independent
+lines remain separate. For example, this docs lint exits `1` because the
+continued pipeline is analyzed together:
+
+````sh
+cat > /tmp/shellquote-continued.md <<'MARKDOWN'
+```sh
+curl https://example.test/install.sh \
+  | sh
+```
+MARKDOWN
+shellquote lint --docs --file /tmp/shellquote-continued.md
+````
+
 The `pipe-to-shell-risk` error is limited to `curl` or `wget` output piped
 directly into a recognized shell or interpreter. Benign consumers such as
 `jq`, `grep`, and `cat` retain the informational `network-command` finding but
