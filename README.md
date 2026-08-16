@@ -104,6 +104,12 @@ directly into a recognized shell or interpreter. Benign consumers such as
 `jq`, `grep`, and `cat` retain the informational `network-command` finding but
 do not produce that execution error.
 
+Command checks resolve leading `NAME=value` assignments and common `env` and
+`sudo` wrappers, including their options, before classifying the effective
+executable. This applies consistently to destructive, network, package, and
+pipe-consumer checks; quoted wrapper option values remain arguments rather than
+being mistaken for commands.
+
 Markdown output wraps input and rewrite commands in code spans whose delimiter
 is longer than any backtick run in the command. Command substitutions such as
 ``echo `date` `` therefore remain intact when the report is rendered, and
