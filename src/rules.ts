@@ -1,4 +1,3 @@
-import { commandName } from './parser.js';
 import type { Diagnostic, ParsedCommand, Token } from './types.js';
 
 const DESTRUCTIVE = new Set(['rm', 'rmdir', 'mv', 'dd', 'mkfs', 'chmod', 'chown', 'sudo']);
@@ -13,10 +12,10 @@ const PIPE_EXECUTION_TARGETS = new Set([
 export function lintParsed(parsed: ParsedCommand): Diagnostic[] {
   const diagnostics: Diagnostic[] = [...parsed.errors];
   for (const [segmentIndex, segment] of parsed.segments.entries()) {
-    const command = commandName(segment);
-    if (!command) continue;
-    const name = commandBasename(command);
-    const args = segment.tokens.slice(1);
+    const resolved = resolveExecutable(segment.tokens);
+    if (!resolved) continue;
+    const name = resolved.name;
+    const args = segment.tokens.slice(resolved.tokenIndex + 1);
     if (DESTRUCTIVE.has(name)) diagnostics.push(destructiveDiagnostic(name, segment.text, segment.start, segment.end));
     if (name === 'rm') diagnostics.push(...lintRm(args));
     if (name === 'curl' || name === 'wget') diagnostics.push(...lintNetworkPipe(parsed, segmentIndex, name));
@@ -43,9 +42,9 @@ function lintRm(args: Token[]): Diagnostic[] {
 function lintNetworkPipe(parsed: ParsedCommand, segmentIndex: number, name: string): Diagnostic[] {
   const nextSegment = parsed.segments[segmentIndex + 1];
   if (nextSegment?.operatorBefore !== '|') return [];
-  const consumer = commandName(nextSegment);
-  if (!consumer || !PIPE_EXECUTION_TARGETS.has(commandBasename(consumer))) return [];
-  return [{ code: 'pipe-to-shell-risk', severity: 'error', message: `${name} output is piped directly into ${consumer}.`, hint: 'Download to a file, inspect it, then run explicitly.' }];
+  const consumer = resolveExecutable(nextSegment.tokens);
+  if (!consumer || !PIPE_EXECUTION_TARGETS.has(consumer.name)) return [];
+  return [{ code: 'pipe-to-shell-risk', severity: 'error', message: `${name} output is piped directly into ${consumer.value}.`, hint: 'Download to a file, inspect it, then run explicitly.' }];
 }
 
 function commandBasename(command: string): string {
@@ -73,27 +72,41 @@ function lintChains(parsed: ParsedCommand): Diagnostic[] {
 }
 
 function segmentExecutables(segment: ParsedCommand['segments'][number]): string[] {
-  const command = commandName(segment);
-  if (!command) return [];
-  const primary = commandBasename(command);
-  if (primary !== 'sudo') return [primary];
+  const resolved = resolveExecutable(segment.tokens);
+  return resolved ? [...resolved.wrappers, resolved.name] : [];
+}
 
-  const args = segment.tokens.slice(1).filter((token) => token.kind === 'word' || token.kind === 'string');
-  const optionsWithValues = new Set(['-C', '--close-from', '-D', '--chdir', '-g', '--group', '-h', '--host', '-p', '--prompt', '-R', '--chroot', '-T', '--command-timeout', '-u', '--user']);
-  for (let index = 0; index < args.length; index += 1) {
-    const value = args[index]?.value ?? '';
-    if (value === '--') {
-      const delegated = args[index + 1]?.value;
-      return delegated ? [primary, commandBasename(delegated)] : [primary];
+const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
+const WRAPPER_OPTIONS_WITH_VALUES: Record<string, Set<string>> = {
+  env: new Set(['-u', '--unset', '-C', '--chdir', '-S', '--split-string']),
+  sudo: new Set(['-C', '--close-from', '-D', '--chdir', '-g', '--group', '-h', '--host', '-p', '--prompt', '-R', '--chroot', '-T', '--command-timeout', '-u', '--user']),
+};
+
+function resolveExecutable(tokens: Token[]): { name: string; value: string; tokenIndex: number; wrappers: string[] } | undefined {
+  const wrappers: string[] = [];
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
+    if (!token || (token.kind !== 'word' && token.kind !== 'string')) continue;
+    if (token.kind === 'word' && ASSIGNMENT.test(token.value)) continue;
+    const name = commandBasename(token.value);
+    const optionsWithValues = WRAPPER_OPTIONS_WITH_VALUES[name];
+    if (!optionsWithValues) return { name, value: token.value, tokenIndex: index, wrappers };
+    wrappers.push(name);
+    for (index += 1; index < tokens.length; index += 1) {
+      const argument = tokens[index];
+      if (!argument || (argument.kind !== 'word' && argument.kind !== 'string')) continue;
+      if (argument.kind === 'word' && ASSIGNMENT.test(argument.value)) continue;
+      if (argument.value === '--') break;
+      if (argument.kind === 'word' && optionsWithValues.has(argument.value)) {
+        index += 1;
+        continue;
+      }
+      if (argument.kind === 'word' && argument.value.startsWith('-')) continue;
+      index -= 1;
+      break;
     }
-    if (optionsWithValues.has(value)) {
-      index += 1;
-      continue;
-    }
-    if (value.startsWith('-')) continue;
-    return [primary, commandBasename(value)];
   }
-  return [primary];
+  return undefined;
 }
 
 function dedupe(diagnostics: Diagnostic[]): Diagnostic[] {

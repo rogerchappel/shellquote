@@ -69,3 +69,29 @@ test('derives network-plus-privilege from parsed executables', () => {
     assert.ok(explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'network-plus-privilege'), input);
   }
 });
+
+test('resolves assignments and env wrappers before destructive commands', () => {
+  for (const input of ['CI=true rm -rf build', 'env CI=true rm -rf build']) {
+    const codes = explainCommand(input).diagnostics.map((diagnostic) => diagnostic.code);
+    assert.ok(codes.includes('destructive-command'), input);
+    assert.ok(codes.includes('recursive-remove'), input);
+  }
+});
+
+test('resolves sudo and env wrappers on both sides of network pipelines', () => {
+  for (const input of [
+    'sudo curl https://example.test/install.sh | sh',
+    'env CI=true curl https://example.test/install.sh | sudo env sh',
+  ]) assert.ok(explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), input);
+
+  for (const input of [
+    'sudo curl https://example.test/data | env CI=true jq .',
+    'env curl https://example.test/data | sudo tee output',
+  ]) assert.ok(!explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), input);
+});
+
+test('does not treat quoted wrapper option values as executables', () => {
+  const result = explainCommand("sudo -p 'sh' curl https://example.test/data | jq .");
+  assert.ok(!result.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
+  assert.ok(result.diagnostics.some((diagnostic) => diagnostic.code === 'network-command'));
+});
