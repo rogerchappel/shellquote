@@ -14,6 +14,35 @@ test('skips destructive commands', () => {
   assert.match(rewrite.skipped.join('\n'), /rm/);
 });
 
+test('skips path-qualified and prefixed destructive commands', () => {
+  for (const input of [
+    '/usr/bin/rm -rf build/*',
+    'CI=true rm -rf build/*',
+    'env CI=true rm -rf build/*',
+    'env -u HOME /bin/rm -rf build/*',
+    'sudo -- /usr/bin/rm -rf build/*',
+    "sudo -p 'Password:' env CI=true rm -rf build/*",
+  ]) {
+    const rewrite = rewriteCommand(input);
+    assert.equal(rewrite.output, input, input);
+    assert.equal(rewrite.changed, false, input);
+    assert.match(rewrite.skipped.join('\n'), /command: rm/, input);
+  }
+});
+
+test('continues to rewrite benign prefixed commands', () => {
+  for (const input of [
+    'CI=true cat $README_PATH',
+    'env CI=true cat $README_PATH',
+    'env -u HOME /usr/bin/cat $README_PATH',
+  ]) {
+    const rewrite = rewriteCommand(input);
+    assert.equal(rewrite.changed, true, input);
+    assert.match(rewrite.output, /"\$README_PATH"$/, input);
+    assert.deepEqual(rewrite.skipped, [], input);
+  }
+});
+
 test('preserves trailing comments and original spacing', () => {
   const source = 'cat   $README_PATH  # keep this explanation';
   const rewrite = rewriteCommand(source);

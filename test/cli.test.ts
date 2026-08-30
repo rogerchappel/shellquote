@@ -96,3 +96,12 @@ test('rewrite preserves comments and multiline command structure', () => {
   assert.equal(result.stdout, 'echo ready && # retain context\ncat "$README_PATH"\n');
   assert.equal(result.stderr, '');
 });
+
+test('rewrite exits one without changing a wrapped destructive command', () => {
+  const input = 'sudo env CI=true /usr/bin/rm -rf $BUILD_DIR/*';
+  const result = runCli(['rewrite', '--', input]);
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, `${input}\n# Skipped automatic rewrite for approval-sensitive command: rm\n`);
+  assert.equal(result.stderr, '');
+});

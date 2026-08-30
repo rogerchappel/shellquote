@@ -1,4 +1,5 @@
 import { parseCommand, tokenText } from './parser.js';
+import { resolveExecutable } from './executable.js';
 import type { Rewrite, Token } from './types.js';
 
 const SAFE_LITERAL = /^[A-Za-z0-9_@%+=:,./-]+$/;
@@ -11,7 +12,7 @@ export function rewriteCommand(source: string): Rewrite {
   const replacements = new Map<Token, string>();
 
   for (const segment of parsed.segments) {
-    const command = segment.tokens[0]?.value;
+    const command = resolveExecutable(segment.tokens)?.name;
     if (command && DANGEROUS_COMMANDS.has(command)) {
       skipped.push(`Skipped automatic rewrite for approval-sensitive command: ${command}`);
       continue;

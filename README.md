@@ -66,7 +66,14 @@ arguments or comments do not trigger the combination.
 
 ## Rewrite philosophy
 
-`shellquote rewrite` is intentionally modest. It quotes unambiguous variables and literal glob-looking tokens, but skips approval-sensitive commands like `rm` and `sudo` rather than pretending safety can be automated. Rewrites preserve shell comments, whitespace, and line structure around the executable tokens they change.
+`shellquote rewrite` is intentionally modest. It quotes unambiguous variables
+and literal glob-looking tokens, but skips approval-sensitive commands like
+`rm` rather than pretending safety can be automated. The same executable
+resolution used by linting applies here: paths, leading assignments, and
+common `env`/`sudo` wrapper forms cannot hide an approval-sensitive command.
+Skipped rewrites preserve the original segment, name the effective command,
+and exit with status `1`. Other rewrites preserve shell comments, whitespace,
+and line structure around the executable tokens they change.
 
 ## Markdown scanning
 
