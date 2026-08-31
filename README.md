@@ -93,8 +93,11 @@ least as long as its opener. Both unlabeled fences and fences labeled `sh`,
 
 Commands continued with a trailing backslash are scanned as one logical
 command, including across `$` and `>` console prompts. Commands on independent
-lines remain separate. For example, this docs lint exits `1` because the
-continued pipeline is analyzed together:
+lines remain separate. Prompt prefixes are removed only from `console` and
+`terminal` fences. In `sh`, `bash`, `shell`, `zsh`, and unlabeled fences,
+leading syntax such as `$CMD --flag` or `> output.txt` is preserved literally.
+For example, this docs lint exits `1` because the continued pipeline is
+analyzed together:
 
 ````sh
 cat > /tmp/shellquote-continued.md <<'MARKDOWN'
