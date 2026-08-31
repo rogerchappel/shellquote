@@ -28,6 +28,33 @@ test('joins continued console prompts but keeps independent lines separate', () 
   assert.deepEqual(shellLinesFromMarkdown(markdown), ['printf "%s\\n" first second', 'echo independent']);
 });
 
+test('preserves leading shell syntax outside console fences', () => {
+  const markdown = [
+    '```sh',
+    '$CMD --flag',
+    '> output.txt',
+    '```',
+    '',
+    '```',
+    '$OTHER --value',
+    '> another.txt',
+    '```',
+  ].join('\n');
+
+  assert.deepEqual(shellLinesFromMarkdown(markdown), [
+    '$CMD --flag',
+    '> output.txt',
+    '$OTHER --value',
+    '> another.txt',
+  ]);
+});
+
+test('removes console prompts including on continuation lines', () => {
+  const markdown = ['```terminal', '$ printf "%s\\n" \\', '>   first second', '> output.txt', '```'].join('\n');
+
+  assert.deepEqual(shellLinesFromMarkdown(markdown), ['printf "%s\\n" first second', 'output.txt']);
+});
+
 test('does not treat an escaped trailing backslash as a continuation', () => {
   const markdown = ['```bash', 'printf path\\\\', 'echo next', '```'].join('\n');
 
