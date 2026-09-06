@@ -79,6 +79,16 @@ test('reports corrected text summaries for embedded hashes', () => {
   assert.match(result.stdout, /0 error, 0 warning, 0 info/);
 });
 
+test('reports and rewrites supported parameter expansion forms through the CLI', () => {
+  const lint = runCli(['lint', 'printf %s ${VALUE} $1 $@', '--format', 'json']);
+  const output = JSON.parse(lint.stdout) as { diagnostics: Array<{ code: string }> };
+  assert.equal(output.diagnostics.filter((diagnostic) => diagnostic.code === 'unquoted-variable').length, 3);
+
+  const rewrite = runCli(['rewrite', 'printf %s ${VALUE} $1 $@']);
+  assert.equal(rewrite.status, 0);
+  assert.equal(rewrite.stdout, 'printf %s "${VALUE}" "$1" "$@"\n');
+});
+
 test('renders command substitution as valid Markdown code spans', () => {
   const result = runCli(['explain', 'echo `date`', '--format', 'markdown']);
 

@@ -8,6 +8,21 @@ test('quotes unquoted variables', () => {
   assert.equal(rewrite.changed, true);
 });
 
+test('quotes exact braced, positional, and special parameter tokens', () => {
+  for (const [input, output] of [
+    ['cat ${README_PATH}', 'cat "${README_PATH}"'],
+    ['printf %s $1', 'printf %s "$1"'],
+    ['printf %s $@', 'printf %s "$@"'],
+    ['echo $?', 'echo "$?"'],
+  ]) assert.equal(rewriteCommand(input).output, output, input);
+});
+
+test('does not rewrite parameter expansions embedded in larger words', () => {
+  const rewrite = rewriteCommand('cat prefix-${README_PATH}');
+  assert.equal(rewrite.changed, false);
+  assert.equal(rewrite.output, 'cat prefix-${README_PATH}');
+});
+
 test('skips destructive commands', () => {
   const rewrite = rewriteCommand('rm -rf build/*');
   assert.equal(rewrite.changed, false);
