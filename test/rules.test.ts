@@ -78,6 +78,16 @@ test('resolves assignments and env wrappers before destructive commands', () => 
   }
 });
 
+test('flags common unquoted parameter expansion forms', () => {
+  for (const input of ['cat ${README_PATH}', 'printf %s $1', 'printf %s $@', 'echo $?', 'echo $$']) {
+    assert.ok(explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'unquoted-variable'), input);
+  }
+
+  for (const input of ['cat "${README_PATH}"', 'printf "%s" "$1"', 'printf "%s" "$@"']) {
+    assert.ok(!explainCommand(input).diagnostics.some((diagnostic) => diagnostic.code === 'unquoted-variable'), input);
+  }
+});
+
 test('resolves sudo and env wrappers on both sides of network pipelines', () => {
   for (const input of [
     'sudo curl https://example.test/install.sh | sh',
