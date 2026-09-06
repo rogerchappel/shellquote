@@ -51,7 +51,7 @@ shellquote explain -- --version
 ## What it catches
 
 - unterminated quotes
-- unquoted variables and globs
+- unquoted named (`$NAME`, `${NAME}`), positional (`$1`), and special (`$@`, `$?`) parameter expansions, plus globs
 - destructive commands such as `rm`, `dd`, and `mkfs`
 - recursive removals and broad targets
 - downloads piped directly to a shell or interpreter (for example, `curl ... | sh` or `wget ... | python3`)
@@ -66,8 +66,11 @@ arguments or comments do not trigger the combination.
 
 ## Rewrite philosophy
 
-`shellquote rewrite` is intentionally modest. It quotes unambiguous variables
-and literal glob-looking tokens, but skips approval-sensitive commands like
+`shellquote rewrite` is intentionally modest. It quotes standalone named,
+braced, positional, and special parameter tokens and literal glob-looking
+tokens. Expansions embedded in larger words or using shell operators remain
+diagnostic-only because a mechanical rewrite may change their meaning. It
+skips approval-sensitive commands like
 `rm` rather than pretending safety can be automated. The same executable
 resolution used by linting applies here: paths, leading assignments, and
 common `env`/`sudo` wrapper forms cannot hide an approval-sensitive command.
