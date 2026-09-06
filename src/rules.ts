@@ -53,7 +53,7 @@ function lintTokens(tokens: Token[]): Diagnostic[] {
   for (const token of tokens) {
     if (token.kind !== 'word' && token.kind !== 'string') continue;
     if (token.kind === 'word' && /[*?[]/.test(token.value)) diagnostics.push({ code: 'unquoted-glob', severity: 'warning', message: `Unquoted glob-like token: ${token.value}`, hint: 'Quote literal globs or narrow the path.', start: token.start, end: token.end });
-    if (token.kind !== 'string' && /\$[A-Za-z_][A-Za-z0-9_]*/.test(token.value)) diagnostics.push({ code: 'unquoted-variable', severity: 'warning', message: `Variable interpolation is unquoted: ${token.value}`, hint: 'Use double quotes around variable expansions.', start: token.start, end: token.end });
+    if (token.kind !== 'string' && /\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\}|[0-9@*#?$!\-])/.test(token.value)) diagnostics.push({ code: 'unquoted-variable', severity: 'warning', message: `Variable interpolation is unquoted: ${token.value}`, hint: 'Use double quotes around variable expansions.', start: token.start, end: token.end });
     if (/`|\$\(/.test(token.value)) diagnostics.push({ code: 'command-substitution', severity: 'warning', message: 'Command substitution hides extra execution.', hint: 'Split into a named variable or explain the substitution.' });
   }
   return diagnostics;

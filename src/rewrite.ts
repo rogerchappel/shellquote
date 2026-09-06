@@ -48,7 +48,7 @@ function rewriteToken(token: Token): string {
   if (token.kind === 'string') return tokenText(token);
   if (token.kind !== 'word') return token.value;
   if (SAFE_LITERAL.test(token.value) && !token.value.includes('*') && !token.value.includes('?')) return token.value;
-  if (/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(token.value)) return `"${token.value}"`;
+  if (/^\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\}|[0-9@*#?$!\-])$/.test(token.value)) return `"${token.value}"`;
   if (/[*?[]/.test(token.value)) return singleQuote(token.value);
   if (/\s/.test(token.value)) return singleQuote(token.value);
   return token.value;
