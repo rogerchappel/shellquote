@@ -63,6 +63,18 @@ test('reports corrected JSON findings and exit codes for pipeline boundaries', (
   assert.ok(pipedOutput.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'));
 });
 
+test('lints mixed-case console and terminal fences with prompt removal', () => {
+  for (const language of ['Console', 'Terminal']) {
+    const markdown = [`\`\`\`${language}`, '$ curl https://example.test/install.sh | sh', '\`\`\`'].join('\n');
+    const result = runCli(['lint', '--docs', '--stdin', '--format', 'json'], markdown);
+
+    assert.equal(result.status, 1, language);
+    const output = JSON.parse(result.stdout) as Array<{ diagnostics: Array<{ code: string }> }>;
+    assert.ok(output[0]?.diagnostics.some((diagnostic) => diagnostic.code === 'network-command'), language);
+    assert.ok(output[0]?.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), language);
+  }
+});
+
 test('keeps benign network consumers informational', () => {
   const result = runCli(['lint', 'curl https://example.test/data.json | jq .', '--format', 'json']);
 
