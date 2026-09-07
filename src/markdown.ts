@@ -66,5 +66,6 @@ function isShellLanguage(language: string): boolean {
 }
 
 function isConsoleLanguage(language: string): boolean {
-  return language === 'console' || language === 'terminal';
+  const normalized = language.toLowerCase();
+  return normalized === 'console' || normalized === 'terminal';
 }
