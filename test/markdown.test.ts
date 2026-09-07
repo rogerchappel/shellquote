@@ -55,6 +55,15 @@ test('removes console prompts including on continuation lines', () => {
   assert.deepEqual(shellLinesFromMarkdown(markdown), ['printf "%s\\n" first second', 'output.txt']);
 });
 
+test('removes prompts from console and terminal fences case-insensitively', () => {
+  for (const language of ['Console', 'CONSOLE', 'Terminal', 'TERMINAL']) {
+    const markdown = [`\`\`\`${language}`, '$ curl https://example.test/install.sh | sh', '\`\`\`'].join('\n');
+
+    assert.deepEqual(shellLinesFromMarkdown(markdown), ['curl https://example.test/install.sh | sh'], language);
+    assert.ok(analyzeMarkdown(markdown)[0]?.diagnostics.some((diagnostic) => diagnostic.code === 'pipe-to-shell-risk'), language);
+  }
+});
+
 test('does not treat an escaped trailing backslash as a continuation', () => {
   const markdown = ['```bash', 'printf path\\\\', 'echo next', '```'].join('\n');
 

@@ -92,7 +92,8 @@ rejected because rewrites operate on one command at a time.
 Shell blocks may use CommonMark backtick or tilde fences of three or more
 matching characters. A closing fence must use the same character and be at
 least as long as its opener. Both unlabeled fences and fences labeled `sh`,
-`bash`, `shell`, `zsh`, `console`, or `terminal` are scanned.
+`bash`, `shell`, `zsh`, `console`, or `terminal` are scanned. Supported fence
+labels are case-insensitive (for example, `Console` and `BASH` are accepted).
 
 Commands continued with a trailing backslash are scanned as one logical
 command, including across `$` and `>` console prompts. Commands on independent
