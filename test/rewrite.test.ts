@@ -81,3 +81,14 @@ test('preserves multiline source when no safe rewrite is needed', () => {
   assert.equal(rewrite.output, source);
   assert.equal(rewrite.changed, false);
 });
+
+test('quotes command substitutions in word tokens as literal text', () => {
+  for (const [input, expected] of [
+    ['echo $(whoami)', "echo '$(whoami)'"],
+    ['echo prefix$(whoami)', "echo 'prefix$(whoami)'"],
+  ]) {
+    const rewrite = rewriteCommand(input);
+    assert.equal(rewrite.output, expected, input);
+    assert.equal(rewrite.changed, true, input);
+  }
+});

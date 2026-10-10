@@ -51,6 +51,7 @@ function rewriteToken(token: Token): string {
   if (/^\$(?:[A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\}|[0-9@*#?$!\-])$/.test(token.value)) return `"${token.value}"`;
   if (/[*?[]/.test(token.value)) return singleQuote(token.value);
   if (/\s/.test(token.value)) return singleQuote(token.value);
+  if (/\$\([^)]*\)/.test(token.value)) return singleQuote(token.value);
   return token.value;
 }
 
